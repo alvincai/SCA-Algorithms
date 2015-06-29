@@ -59,15 +59,16 @@ class DES_PI():
             leakage.append(self.acq.traces[i][samplePoint])
         leakage = set(leakage)
 
-        for i in leakage:
+
+        for i in range(int(min(leakage)-self.sd[0]*5), int(max(leakage)+self.sd[0]*5)):
             norm = 0.0
             for sboxCandidate in range(DES_PI.NK):
                 # sum of PR[L|V] for all V
-                norm += scipy.stats.norm(self.mean[sboxCandidate], self.sd[sboxCandidate]).pdf(i)
+                norm += scipy.stats.norm(self.mean[sboxCandidate], self.sd[sboxCandidate]).pdf(i)  * DES_PI.Pr_x[sboxCandidate]
 
             for sboxIn in range(DES_PI.NK):
                 PrLX = scipy.stats.norm(self.mean[sboxIn], self.sd[sboxIn]).pdf(i) #Pr[Leakage| V ]
-                PrXL = PrLX / norm
+                PrXL = PrLX  * DES_PI.Pr_x[sboxIn] / norm
 
                 if(PrXL!=0.0):
                     if np.isnan(PrXL):
@@ -164,22 +165,12 @@ if __name__ == "__main__":
     roundNum = 1    # Do not Change this. Currently fixed to 1.
     rk = des_block.roundkey(correctKey,roundNum)   # Correct Round Key of roundNum
     sk = des_block.subkey(rk,sboxNum)             # Correct Sbox Key of roundNum, sboxNum
-
-    trsFile = 'traces/0001.trs'
-    acq = LoadTraces.LoadTraces(trsFile, numTraces=20001, samplePoint = 3881)
-    t= DES_PI(acq)
     samplePoint = 0
-    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =18000)
-    t.plot()
-    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 18001, endTrace = 20000))
 
-
-    acq = LoadTraces.LoadTraces('traces/0002.trs', numTraces = 20001, samplePoint = 18694)
-    t= DES_PI(acq)
-    samplePoint = 0
-    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =18000)
-    t.plot()
-
-    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 18001, endTrace = 20000))
+    acq = LoadTraces.LoadTraces('traces/0001.trs', samplePoint = 3881, numTraces = 100000)
+    t = DES_PI(acq)
+    #acq.shuffle()
+    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =100000)
+    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace = 100000))
 
 

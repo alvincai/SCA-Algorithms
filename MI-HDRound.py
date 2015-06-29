@@ -57,18 +57,17 @@ class DES_PI():
         leakage=[]
         for i in range(startTrace, endTrace):
             leakage.append(self.acq.traces[i][samplePoint])
-        leakage = set(leakage)
+        #leakage = set(leakage)
 
-        for i in leakage:
+        for i in range(int(min(leakage)-self.sd[0]*5), int(max(leakage)+self.sd[0]*5)):
             norm = 0.0
             for sboxCandidate in range(DES_PI.NK):
                 # sum of PR[L|V] for all V
-                norm += scipy.stats.norm(self.mean[sboxCandidate], self.sd[sboxCandidate]).pdf(i)
+                norm += scipy.stats.norm(self.mean[sboxCandidate], self.sd[sboxCandidate]).pdf(i) * DES_PI.Pr_x[sboxCandidate]
 
-            print norm
             for sboxIn in range(DES_PI.NK):
                 PrLX = scipy.stats.norm(self.mean[sboxIn], self.sd[sboxIn]).pdf(i) #Pr[Leakage| V ]
-                PrXL = PrLX / norm
+                PrXL = PrLX* DES_PI.Pr_x[sboxIn] / norm
 
                 if(PrXL!=0.0):
                     if np.isnan(PrXL):
@@ -129,9 +128,6 @@ class DES_PI():
                 print "Not enough measurements for sbox input %d ! Please rebuild the template with more measurements" % i
 
 
-        for i in range(5):
-            self.mean[i] = self.mean[0]
-            self.sd[i] = self.sd[0]
         print self.mean
         print self.sd
 
@@ -172,19 +168,19 @@ if __name__ == "__main__":
     sk = des_block.subkey(rk,sboxNum)             # Correct Sbox Key of roundNum, sboxNum
 
     trsFile = 'traces/1001.trs'
-    acq = LoadTraces.LoadTraces(trsFile, numTraces=30001, samplePoint = 282)
+    acq = LoadTraces.LoadTraces(trsFile, numTraces=300001, samplePoint = 282)
     t= DES_PI(acq)
     samplePoint = 0
-    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =20000)
-    t.plot()
-    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 20001, endTrace = 21000))
+    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =300000)
+    #t.plot()
+    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 01, endTrace = 300000))
 
     trsFile = 'traces/1002.trs'
-    acq = LoadTraces.LoadTraces(trsFile, numTraces=30001, samplePoint = 44)
+    acq = LoadTraces.LoadTraces(trsFile, numTraces=300001, samplePoint = 44)
     t= DES_PI(acq)
     samplePoint = 0
-    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =20000)
-    t.plot()
-    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 20001, endTrace = 21000))
+    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =300000)
+    #t.plot()
+    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace = 300000))
 
 

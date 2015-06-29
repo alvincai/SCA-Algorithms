@@ -107,6 +107,8 @@ class DES_PI():
         excludestartTrace, excludedEndTrace - Exclude the traces between excludeStartTrace to excludeEndTrace. This interval should be between startTrace and endTrace. It is used for cross validation.
         """
         self.noise = []
+        self.samplePoint = samplePoint
+        self.num = endTrace-startTrace
         for i in range(DES_PI.NK):
             self.noise.append([])
 
@@ -138,6 +140,27 @@ class DES_PI():
 
 
 
+    def plot(self):
+        yV = []
+        for i in range(DES_PI.NK):
+            yV.append([])
+
+
+        xV = []
+        for i in range(0, self.num):
+            xV.append(self.acq.traces[i][self.samplePoint])
+        xV = set(xV)
+        xV=list(xV)
+        xV.sort()
+
+        for x in xV:
+            for i in range(DES_PI.NK):
+                yV[i].append(scipy.stats.norm(self.mean[i], self.sd[i]).pdf(x))
+        for i in range(DES_PI.NK):
+            plt.plot(xV, yV[i])
+        plt.show()
+
+
     def ptNumpyArray2String(self, inputtext):
         ptStr = ""
         for i in range(self.acq.blockSize):
@@ -153,6 +176,7 @@ if __name__ == "__main__":
     samplePoint = 0
 
     t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =9000)
+    t.plot()
     print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 9501, endTrace = 10000))
 
 
