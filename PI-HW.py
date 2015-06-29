@@ -65,7 +65,6 @@ class DES_PI():
                 # sum of PR[L|V] for all V
                 norm += scipy.stats.norm(self.mean[sboxCandidate], self.sd[sboxCandidate]).pdf(i)
 
-            print norm
             for sboxIn in range(DES_PI.NK):
                 PrLX = scipy.stats.norm(self.mean[sboxIn], self.sd[sboxIn]).pdf(i) #Pr[Leakage| V ]
                 PrXL = PrLX / norm
@@ -117,7 +116,7 @@ class DES_PI():
                 ptBlock = des_block.ptblock2(ptStr, sboxNum)     # 6-bit block of plaintext which is fed into sboxNum
                 sboxIn = ptBlock ^ subkey
                 sboxOut = des_block.sbox(sboxNum, sboxIn)
-                hyp = HD(sboxOut,des_block.ptRoundIn(ptStr,sboxNum))
+                hyp = HW(sboxOut)
                 self.noise[hyp].append(self.acq.traces[i + startTrace][samplePoint])
 
 
@@ -128,10 +127,6 @@ class DES_PI():
             if len(self.noise[i]) == 0:
                 print "Not enough measurements for sbox input %d ! Please rebuild the template with more measurements" % i
 
-
-        for i in range(5):
-            self.mean[i] = self.mean[0]
-            self.sd[i] = self.sd[0]
         print self.mean
         print self.sd
 
@@ -143,24 +138,23 @@ class DES_PI():
 
     def plot(self):
         yV = []
-        for i in range(5):
-            yV.append([])
 
-
-        xV = []
+        xV=[]
         for i in range(0, self.num):
             xV.append(self.acq.traces[i][self.samplePoint])
         xV = set(xV)
         xV=list(xV)
         xV.sort()
 
+        for i in range(5):
+            yV.append([])
+        #xV = range( min(x1,x2), max(x1,x2))
         for x in xV:
             for i in range(5):
                 yV[i].append(scipy.stats.norm(self.mean[i], self.sd[i]).pdf(x))
         for i in range(5):
             plt.plot(xV, yV[i])
         plt.show()
-
 
 
 
@@ -171,20 +165,21 @@ if __name__ == "__main__":
     rk = des_block.roundkey(correctKey,roundNum)   # Correct Round Key of roundNum
     sk = des_block.subkey(rk,sboxNum)             # Correct Sbox Key of roundNum, sboxNum
 
-    trsFile = 'traces/1001.trs'
-    acq = LoadTraces.LoadTraces(trsFile, numTraces=30001, samplePoint = 282)
+    trsFile = 'traces/0001.trs'
+    acq = LoadTraces.LoadTraces(trsFile, numTraces=20001, samplePoint = 3881)
     t= DES_PI(acq)
     samplePoint = 0
-    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =20000)
+    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =18000)
     t.plot()
-    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 20001, endTrace = 21000))
+    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 18001, endTrace = 20000))
 
-    trsFile = 'traces/1002.trs'
-    acq = LoadTraces.LoadTraces(trsFile, numTraces=30001, samplePoint = 44)
+
+    acq = LoadTraces.LoadTraces('traces/0002.trs', numTraces = 20001, samplePoint = 18694)
     t= DES_PI(acq)
     samplePoint = 0
-    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =20000)
+    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =18000)
     t.plot()
-    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 20001, endTrace = 21000))
+
+    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 18001, endTrace = 20000))
 
 
