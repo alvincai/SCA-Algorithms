@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from util import *
 import scipy.stats
 from collections import Counter
+import scipy.io
 
 class DES_PI():
     """ Calculate the percieved information for DES """
@@ -37,25 +38,28 @@ class DES_PI():
 
         Nm = endTrace - startTrace
         pi = DES_PI.H_x
-
         leakage = []
         for i in range(startTrace, endTrace):
             leakage.append(self.acq.traces[i][samplePoint])
         leakage = set(leakage)
 
-        for i in leakage:
+
+        for i in range(int(min(leakage)-self.sd[0]*5), int(max(leakage)+self.sd[0]*5)):
             norm = 0.0
+
             for sboxCandidate in range(DES_PI.NK):
-                # norm is the sum of Pr[L|X] for all X
+                # normalise the sum of probabilities to 1
                 norm += scipy.stats.norm(self.mean[sboxCandidate], self.sd[sboxCandidate]).pdf(i)
 
             for sboxIn in range(DES_PI.NK):
-                PrLX = scipy.stats.norm(self.mean[sboxIn], self.sd[sboxIn]).pdf(i) # Pr[L|X]
-                PrXL = PrLX / norm  #Pr[X|L]
+                PrLX = scipy.stats.norm(self.mean[sboxIn], self.sd[sboxIn]).pdf(i)
+                PrXL = PrLX / norm  #Pr[X| Leakage] is estimated with this probabilty
 
                 if(PrXL!=0):
                     pi += DES_PI.Pr_x * PrLX * np.log2(PrXL)
         return pi
+
+
 
     def check(self):
         for i in self.mean:
@@ -107,8 +111,6 @@ class DES_PI():
         excludestartTrace, excludedEndTrace - Exclude the traces between excludeStartTrace to excludeEndTrace. This interval should be between startTrace and endTrace. It is used for cross validation.
         """
         self.noise = []
-        self.samplePoint = samplePoint
-        self.num = endTrace-startTrace
         for i in range(DES_PI.NK):
             self.noise.append([])
 
@@ -138,27 +140,8 @@ class DES_PI():
             if len(self.noise[i]) == 0:
                 print "Not enough measurements for sbox input %d ! Please rebuild the template with more measurements" % i
 
-
-
-    def plot(self):
-        yV = []
-        for i in range(DES_PI.NK):
-            yV.append([])
-
-
-        xV = []
-        for i in range(0, self.num):
-            xV.append(self.acq.traces[i][self.samplePoint])
-        xV = set(xV)
-        xV=list(xV)
-        xV.sort()
-
-        for x in xV:
-            for i in range(DES_PI.NK):
-                yV[i].append(scipy.stats.norm(self.mean[i], self.sd[i]).pdf(x))
-        for i in range(DES_PI.NK):
-            plt.plot(xV, yV[i])
-        plt.show()
+        #print self.mean
+        #print self.sd
 
 
     def ptNumpyArray2String(self, inputtext):
@@ -170,13 +153,51 @@ class DES_PI():
 
 
 if __name__ == "__main__":
-    acq = LoadTraces.LoadTraces('../thesis/traces/0002.trs', samplePoint = 18694)
-    t = DES_PI(acq)
     sboxNum = 1
     samplePoint = 0
 
-    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =9000)
-    t.plot()
-    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 9501, endTrace = 10000))
+
+    acq = LoadTraces.LoadTraces('traces/0001.trs', samplePoint = 3881, numTraces = 90000)
+    t = DES_PI(acq)
+    #acq.shuffle()
+    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =90000)
+    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace = 90000))
+
+    acq = LoadTraces.LoadTraces('/Data/Documents/0006.trs', samplePoint = 48945, numTraces = 300000)
+    t = DES_PI(acq)
+    #acq.shuffle()
+    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =90000)
+    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace = 90000))
+
+
+    acq = LoadTraces.LoadTraces('traces/0005.trs', samplePoint = 14403, numTraces = 300000)
+    t = DES_PI(acq)
+    #acq.shuffle()
+    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =90000)
+    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace = 90000))
+
+
+
+    acq = LoadTraces.LoadTraces('/Data/Documents/0007.trs', samplePoint = 39205, numTraces = 100000)
+    t = DES_PI(acq)
+    #acq.shuffle()
+    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =90000)
+    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace = 90000))
+
+
+
+    acq = LoadTraces.LoadTraces('traces/1001.trs', samplePoint = 282, numTraces = 300000)
+    t = DES_PI(acq)
+    #acq.shuffle()
+    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =90000)
+    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace = 90000))
+
+
+    acq = LoadTraces.LoadTraces('traces/1002.trs', samplePoint = 44, numTraces = 300000)
+    t = DES_PI(acq)
+    #acq.shuffle()
+    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =90000)
+    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace = 90000))
+
 
 
