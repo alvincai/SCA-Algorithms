@@ -163,41 +163,4 @@ if __name__ == "__main__":
     t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =90000)
     print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace = 90000))
 
-    acq = LoadTraces.LoadTraces('/Data/Documents/0006.trs', samplePoint = 48945, numTraces = 300000)
-    t = DES_PI(acq)
-    #acq.shuffle()
-    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =90000)
-    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace = 90000))
-
-
-    acq = LoadTraces.LoadTraces('traces/0005.trs', samplePoint = 14403, numTraces = 300000)
-    t = DES_PI(acq)
-    #acq.shuffle()
-    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =90000)
-    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace = 90000))
-
-
-
-    acq = LoadTraces.LoadTraces('/Data/Documents/0007.trs', samplePoint = 39205, numTraces = 100000)
-    t = DES_PI(acq)
-    #acq.shuffle()
-    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =90000)
-    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace = 90000))
-
-
-
-    acq = LoadTraces.LoadTraces('traces/1001.trs', samplePoint = 282, numTraces = 300000)
-    t = DES_PI(acq)
-    #acq.shuffle()
-    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =90000)
-    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace = 90000))
-
-
-    acq = LoadTraces.LoadTraces('traces/1002.trs', samplePoint = 44, numTraces = 300000)
-    t = DES_PI(acq)
-    #acq.shuffle()
-    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =90000)
-    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace = 90000))
-
-
 

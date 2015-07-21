@@ -175,12 +175,4 @@ if __name__ == "__main__":
     #t.plot()
     print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 01, endTrace = 300000))
 
-    trsFile = 'traces/1002.trs'
-    acq = LoadTraces.LoadTraces(trsFile, numTraces=300001, samplePoint = 44)
-    t= DES_PI(acq)
-    samplePoint = 0
-    t.buildTemplate(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace =300000)
-    #t.plot()
-    print "PI is %f" % (t.pi(0x1f, sboxNum, samplePoint, startTrace = 0, endTrace = 300000))
-
 
